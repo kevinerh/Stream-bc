@@ -1,7 +1,7 @@
 import streamlit as st
 import feedparser
 from datetime import datetime
-from fear_and_greed import get_fear_and_greed
+from fear_and_greed import FearAndGreedIndex
 import requests
 import plotly.graph_objects as go
 
@@ -9,11 +9,11 @@ import plotly.graph_objects as go
 st.set_page_config(page_title="Bitcoin News + Sentiment", layout="centered")
 st.title("📰 Bitcoin News via RSS (CoinDesk)")
 
-# --- Fetch and display Fear & Greed Index ---
+# --- Fetch and display Crypto Fear & Greed Index ---
 try:
-    fng_data = get_fear_and_greed()
-    value = fng_data.get("fear_and_greed", {}).get("value", 0)
-    label = fng_data.get("fear_and_greed", {}).get("value_classification", "N/A")
+    fng = FearAndGreedIndex()
+    value = fng.get_current_value()
+    label = fng.get_current_classification()
     st.metric(label="📈 Crypto Fear & Greed Index", value=value, delta=label)
 except Exception as e:
     st.error(f"Could not fetch Fear & Greed Index: {e}")
@@ -33,17 +33,17 @@ else:
     gauge_color = "green"
 
 fig = go.Figure(go.Indicator(
-    mode = "gauge+number",
-    value = value,
-    title = {'text': "Fear & Greed Index"},
-    gauge = {
+    mode="gauge+number",
+    value=value,
+    title={'text': "Fear & Greed Index"},
+    gauge={
         'axis': {'range': [0, 100]},
         'bar': {'color': gauge_color},
     }
 ))
 st.plotly_chart(fig)
 
-# --- Parse RSS feed ---
+# --- Parse RSS feed from CoinDesk ---
 RSS_URL = "https://www.coindesk.com/arc/outboundfeeds/rss/"
 feed = feedparser.parse(requests.get(RSS_URL, headers={"User-Agent": "Mozilla/5.0"}).content)
 entries = feed.entries[:100]
