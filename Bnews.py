@@ -4,6 +4,15 @@ from datetime import datetime
 import requests
 import plotly.graph_objects as go
 
+st.set_page_config(
+    page_title="Bitcoin News + Sentiment",
+    layout="centered",
+    menu_items={
+        'Get Help': None,
+        'Report a Bug': None,
+        'About': None
+    }
+)
 # --- Set up app ---
 st.set_page_config(page_title="Bitcoin News + Sentiment", layout="centered")
 st.title("📰 Bitcoin News via RSS (CoinDesk)")
