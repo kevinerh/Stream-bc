@@ -1,7 +1,7 @@
 import streamlit as st
 import feedparser
 from datetime import datetime
-from fear_and_greed import FearAndGreedIndex
+from fear_and_greed import get_fear_and_greed
 import requests
 import plotly.graph_objects as go
 
@@ -11,9 +11,9 @@ st.title("📰 Bitcoin News via RSS (CoinDesk)")
 
 # --- Fetch and display Fear & Greed Index ---
 try:
-    fng = FearAndGreedIndex()
-    value = fng.get_current_value()
-    label = fng.get_current_classification()
+    fng_data = get_fear_and_greed()
+    value = fng_data.get("fear_and_greed", {}).get("value", 0)
+    label = fng_data.get("fear_and_greed", {}).get("value_classification", "N/A")
     st.metric(label="📈 Crypto Fear & Greed Index", value=value, delta=label)
 except Exception as e:
     st.error(f"Could not fetch Fear & Greed Index: {e}")
@@ -69,7 +69,7 @@ else:
             image = post.media_content[0]["url"]
         elif post.get("links"):
             for link_obj in post.links:
-                if link_obj.get("rel") == "enclosure" and link_obj.get("type","").startswith("image"):
+                if link_obj.get("rel") == "enclosure" and link_obj.get("type", "").startswith("image"):
                     image = link_obj["href"]
                     break
 
