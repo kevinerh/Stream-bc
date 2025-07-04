@@ -1,7 +1,6 @@
 import streamlit as st
 import feedparser
 from datetime import datetime
-from fear_and_greed import FearAndGreedIndex
 import requests
 import plotly.graph_objects as go
 
@@ -9,11 +8,12 @@ import plotly.graph_objects as go
 st.set_page_config(page_title="Bitcoin News + Sentiment", layout="centered")
 st.title("📰 Bitcoin News via RSS (CoinDesk)")
 
-# --- Fetch and display Crypto Fear & Greed Index ---
+# --- Fetch and display Crypto Fear & Greed Index (from Alternative.me API) ---
 try:
-    fng = FearAndGreedIndex()
-    value = fng.get_current_value()
-    label = fng.get_current_classification()
+    response = requests.get("https://api.alternative.me/fng/")
+    data = response.json()
+    value = int(data["data"][0]["value"])
+    label = data["data"][0]["value_classification"]
     st.metric(label="📈 Crypto Fear & Greed Index", value=value, delta=label)
 except Exception as e:
     st.error(f"Could not fetch Fear & Greed Index: {e}")
@@ -22,7 +22,7 @@ except Exception as e:
 
 st.markdown("---")
 
-# Set gauge color based on value
+# --- Gauge Color ---
 if value < 25:
     gauge_color = "red"
 elif value < 50:
@@ -32,6 +32,7 @@ elif value < 75:
 else:
     gauge_color = "green"
 
+# --- Gauge Chart ---
 fig = go.Figure(go.Indicator(
     mode="gauge+number",
     value=value,
@@ -48,12 +49,14 @@ RSS_URL = "https://www.coindesk.com/arc/outboundfeeds/rss/"
 feed = feedparser.parse(requests.get(RSS_URL, headers={"User-Agent": "Mozilla/5.0"}).content)
 entries = feed.entries[:100]
 
+# --- Filter for Bitcoin News ---
 bitcoin_entries = [
     post for post in entries
     if "bitcoin" in post.get("title", "").lower()
     or "bitcoin" in post.get("summary", "").lower()
 ]
 
+# --- Display News ---
 if not bitcoin_entries:
     st.warning("No Bitcoin news found.")
 else:
