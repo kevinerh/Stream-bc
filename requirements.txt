@@ -2,4 +2,4 @@ streamlit==1.46.0
 plotly==6.0.1
 requests==2.32.3
 feedparser==6.0.11
-fear_and_greed==0.4
+fear-and-greed==0.4
